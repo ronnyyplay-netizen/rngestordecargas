@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDrivers, useExpenses, useRevenues, type Expense } from "@/hooks/use-store";
+import { supabase } from "@/integrations/supabase/client";
 import { exportToPDF, exportToExcel, exportToDoc } from "@/lib/export-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, FileText, FileSpreadsheet, File, DollarSign, TrendingDown, TrendingUp, Pencil, Save, X, Filter } from "lucide-react";
+import { Plus, Trash2, FileText, FileSpreadsheet, File, DollarSign, TrendingDown, TrendingUp, Pencil, Save, X, Filter, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 const CATEGORIES = ["Combustível", "Manutenção", "Pedágio", "Alimentação", "Ajudante", "Motorista", "Frete", "Seguro", "Multa", "Outros"];
