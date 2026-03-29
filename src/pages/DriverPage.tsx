@@ -26,6 +26,8 @@ export default function DriverPage() {
   const [filterCategory, setFilterCategory] = useState("Todas");
   const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const expFileInputRef = useRef<HTMLInputElement>(null);
+  const [expInvoiceFile, setExpInvoiceFile] = useState<File | null>(null);
 
   // Edit driver state
   const [editing, setEditing] = useState(false);
@@ -60,6 +62,34 @@ export default function DriverPage() {
   async function handleAddExpense() {
     if (!desc.trim() || !amount) return;
     await addExp({ description: desc.trim(), amount: parseFloat(amount), date, category, driverId: driver!.id });
+    
+    if (expInvoiceFile) {
+      try {
+        const user = (await supabase.auth.getUser()).data.user;
+        if (user) {
+          const filePath = `${user.id}/${Date.now()}_${expInvoiceFile.name}`;
+          const { error: uploadError } = await supabase.storage.from('invoices').upload(filePath, expInvoiceFile);
+          if (uploadError) throw uploadError;
+          
+          await supabase.from('invoices').insert({
+            owner_id: user.id,
+            driver_id: driver!.id,
+            file_name: expInvoiceFile.name,
+            file_path: filePath,
+            file_type: expInvoiceFile.type,
+            file_size: expInvoiceFile.size,
+            notes: `Despesa: ${desc.trim()}`,
+          });
+          toast.success("Nota fiscal anexada!");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Erro ao enviar nota fiscal");
+      }
+      setExpInvoiceFile(null);
+      if (expFileInputRef.current) expFileInputRef.current.value = '';
+    }
+    
     setDesc(""); setAmount("");
     toast.success("Despesa adicionada");
   }
@@ -175,26 +205,30 @@ export default function DriverPage() {
               {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
             </select>
           )}
-          {tab === "revenue" && (
-            <div className="flex items-center gap-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.xml"
-                className="hidden"
-                onChange={(e) => setInvoiceFile(e.target.files?.[0] || null)}
-              />
-              <Button
-                type="button"
-                variant={invoiceFile ? "default" : "outline"}
-                className="w-full"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload className="w-4 h-4 mr-1" />
-                {invoiceFile ? invoiceFile.name.slice(0, 20) : "Nota Fiscal"}
-              </Button>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <input
+              ref={tab === "expenses" ? expFileInputRef : fileInputRef}
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png,.xml"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                if (tab === "expenses") setExpInvoiceFile(file);
+                else setInvoiceFile(file);
+              }}
+            />
+            <Button
+              type="button"
+              variant={(tab === "expenses" ? expInvoiceFile : invoiceFile) ? "default" : "outline"}
+              className="w-full"
+              onClick={() => (tab === "expenses" ? expFileInputRef : fileInputRef).current?.click()}
+            >
+              <Upload className="w-4 h-4 mr-1" />
+              {(tab === "expenses" ? expInvoiceFile : invoiceFile)
+                ? (tab === "expenses" ? expInvoiceFile! : invoiceFile!).name.slice(0, 20)
+                : "Nota Fiscal"}
+            </Button>
+          </div>
           <Button onClick={tab === "expenses" ? handleAddExpense : handleAddRevenue} className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="w-4 h-4 mr-1" /> Adicionar
           </Button>
