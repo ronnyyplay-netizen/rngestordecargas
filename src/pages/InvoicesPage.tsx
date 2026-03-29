@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useDrivers } from "@/hooks/use-store";
-import { useInvoices, viewInvoice, downloadInvoice } from "@/hooks/use-invoices";
+import { useInvoices, viewInvoice, downloadInvoice, type Invoice } from "@/hooks/use-invoices";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
