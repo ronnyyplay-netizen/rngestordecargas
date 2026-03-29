@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDrivers, useExpenses, useRevenues, type Expense } from "@/hooks/use-store";
+import { supabase } from "@/integrations/supabase/client";
 import { exportToPDF, exportToExcel, exportToDoc } from "@/lib/export-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, FileText, FileSpreadsheet, File, DollarSign, TrendingDown, TrendingUp, Pencil, Save, X, Filter } from "lucide-react";
+import { Plus, Trash2, FileText, FileSpreadsheet, File, DollarSign, TrendingDown, TrendingUp, Pencil, Save, X, Filter, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 const CATEGORIES = ["Combustível", "Manutenção", "Pedágio", "Alimentação", "Ajudante", "Motorista", "Frete", "Seguro", "Multa", "Outros"];
@@ -23,6 +24,8 @@ export default function DriverPage() {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [filterCategory, setFilterCategory] = useState("Todas");
+  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Edit driver state
   const [editing, setEditing] = useState(false);
@@ -64,6 +67,36 @@ export default function DriverPage() {
   async function handleAddRevenue() {
     if (!desc.trim() || !amount) return;
     await addRev({ description: desc.trim(), amount: parseFloat(amount), date, driverId: driver!.id });
+    
+    // Upload invoice file if selected
+    if (invoiceFile) {
+      try {
+        const user = (await supabase.auth.getUser()).data.user;
+        if (user) {
+          const ext = invoiceFile.name.split('.').pop();
+          const filePath = `${user.id}/${Date.now()}_${invoiceFile.name}`;
+          const { error: uploadError } = await supabase.storage.from('invoices').upload(filePath, invoiceFile);
+          if (uploadError) throw uploadError;
+          
+          await supabase.from('invoices').insert({
+            owner_id: user.id,
+            driver_id: driver!.id,
+            file_name: invoiceFile.name,
+            file_path: filePath,
+            file_type: invoiceFile.type,
+            file_size: invoiceFile.size,
+            notes: desc.trim(),
+          });
+          toast.success("Nota fiscal anexada!");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Erro ao enviar nota fiscal");
+      }
+      setInvoiceFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+    
     setDesc(""); setAmount("");
     toast.success("Receita adicionada");
   }
@@ -141,6 +174,26 @@ export default function DriverPage() {
             <select className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm" value={category} onChange={(e) => setCategory(e.target.value)}>
               {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
             </select>
+          )}
+          {tab === "revenue" && (
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.xml"
+                className="hidden"
+                onChange={(e) => setInvoiceFile(e.target.files?.[0] || null)}
+              />
+              <Button
+                type="button"
+                variant={invoiceFile ? "default" : "outline"}
+                className="w-full"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="w-4 h-4 mr-1" />
+                {invoiceFile ? invoiceFile.name.slice(0, 20) : "Nota Fiscal"}
+              </Button>
+            </div>
           )}
           <Button onClick={tab === "expenses" ? handleAddExpense : handleAddRevenue} className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="w-4 h-4 mr-1" /> Adicionar
