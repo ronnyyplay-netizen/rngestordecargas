@@ -16,6 +16,7 @@ export default function DriverPage() {
   const { drivers, update: updateDriver } = useDrivers();
   const { expenses, add: addExp, remove: removeExp } = useExpenses(id);
   const { revenues, add: addRev, remove: removeRev } = useRevenues(id);
+  const { invoices: driverInvoices, refetch: refetchInvoices } = useInvoices(id);
 
   const driver = drivers.find((d) => d.id === id);
 
