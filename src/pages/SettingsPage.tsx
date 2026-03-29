@@ -60,7 +60,7 @@ export default function SettingsPage() {
   const [synced, setSynced] = useState(false);
 
   // Sync local state when settings load from DB
-  if (!synced && settings.companyName !== "Galos Transportes" || (settings.companyName === "Galos Transportes" && !synced)) {
+  if (!synced) {
     if (settings.companyName !== name || settings.logoUrl !== logo) {
       setName(settings.companyName);
       setLogo(settings.logoUrl);
