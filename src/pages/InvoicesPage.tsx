@@ -205,7 +205,7 @@ export default function InvoicesPage() {
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() => handleView(inv)}
+                              onClick={() => viewInvoice(inv.file_path)}
                               title="Visualizar"
                             >
                               <Eye className="w-4 h-4" />
