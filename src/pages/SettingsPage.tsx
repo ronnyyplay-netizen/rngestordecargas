@@ -159,7 +159,7 @@ export default function SettingsPage() {
   }
 
   async function handleSave() {
-    await save({ companyName: name.trim() || "Galos Transportes", logoUrl: logo });
+    await save({ companyName: name.trim() || "Minha Empresa", logoUrl: logo });
     toast.success("Configurações salvas!");
   }
 
