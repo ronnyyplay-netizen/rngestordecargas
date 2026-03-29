@@ -80,33 +80,6 @@ export default function InvoicesPage() {
     fetchInvoices();
   }
 
-  async function handleDownload(inv: Invoice) {
-    const { data } = await supabase.storage
-      .from("invoices")
-      .download(inv.file_path);
-    if (!data) {
-      toast.error("Erro ao baixar arquivo");
-      return;
-    }
-    const url = URL.createObjectURL(data);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = inv.file_name;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  async function handleView(inv: Invoice) {
-    const { data } = await supabase.storage
-      .from("invoices")
-      .createSignedUrl(inv.file_path, 300);
-    if (data?.signedUrl) {
-      window.open(data.signedUrl, "_blank");
-    } else {
-      toast.error("Erro ao gerar link de visualização");
-    }
-  }
-
   function formatSize(bytes: number) {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
