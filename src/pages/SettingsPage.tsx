@@ -34,7 +34,7 @@ const revenueSchema = z.object({
 });
 
 const settingsSchema = z.object({
-  companyName: z.string().trim().min(1).max(200).default("Galos Transportes"),
+  companyName: z.string().trim().min(1).max(200).default("Minha Empresa"),
   logoUrl: z.string().max(500_000).refine(
     (val) => val === "" || val.startsWith("data:image/"),
     { message: "Logo must be a base64 data:image URL or empty" }
