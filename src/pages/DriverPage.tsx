@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDrivers, useExpenses, useRevenues, type Expense } from "@/hooks/use-store";
+import { useInvoices, viewInvoice, downloadInvoice } from "@/hooks/use-invoices";
 import { supabase } from "@/integrations/supabase/client";
 import { exportToPDF, exportToExcel, exportToDoc } from "@/lib/export-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, FileText, FileSpreadsheet, File, DollarSign, TrendingDown, TrendingUp, Pencil, Save, X, Filter, Upload } from "lucide-react";
+import { Plus, Trash2, FileText, FileSpreadsheet, File, DollarSign, TrendingDown, TrendingUp, Pencil, Save, X, Filter, Upload, Eye, Download } from "lucide-react";
 import { toast } from "sonner";
 
 const CATEGORIES = ["Combustível", "Manutenção", "Pedágio", "Alimentação", "Ajudante", "Motorista", "Frete", "Seguro", "Multa", "Outros"];
@@ -15,6 +16,7 @@ export default function DriverPage() {
   const { drivers, update: updateDriver } = useDrivers();
   const { expenses, add: addExp, remove: removeExp } = useExpenses(id);
   const { revenues, add: addRev, remove: removeRev } = useRevenues(id);
+  const { invoices: driverInvoices, refetch: refetchInvoices } = useInvoices(id);
 
   const driver = drivers.find((d) => d.id === id);
 
@@ -81,6 +83,7 @@ export default function DriverPage() {
             notes: `Despesa: ${desc.trim()}`,
           });
           toast.success("Nota fiscal anexada!");
+          refetchInvoices();
         }
       } catch (err) {
         console.error(err);
@@ -118,6 +121,7 @@ export default function DriverPage() {
             notes: desc.trim(),
           });
           toast.success("Nota fiscal anexada!");
+          refetchInvoices();
         }
       } catch (err) {
         console.error(err);
@@ -264,32 +268,55 @@ export default function DriverPage() {
         {(tab === "expenses" ? filteredExpenses : filteredRevenues).length === 0 ? (
           <p className="text-muted-foreground text-sm text-center py-8">Nenhum registro ainda.</p>
         ) : (
-          (tab === "expenses" ? filteredExpenses : filteredRevenues).map((item) => (
-            <div key={item.id} className="flex items-center justify-between px-4 py-3 bg-card rounded-lg border hover:shadow-md transition-shadow">
-              <div>
-                <p className="font-medium text-sm">{item.description}</p>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(item.date).toLocaleDateString("pt-BR")}
-                  {"category" in item && ` • ${(item as Expense).category}`}
-                  {"isBoleto" in item && (item as Expense).isBoleto && " • 📄 Boleto"}
-                </p>
+          (tab === "expenses" ? filteredExpenses : filteredRevenues).map((item) => {
+            const matchingInvoices = driverInvoices.filter(inv => 
+              inv.notes.includes(item.description) || 
+              inv.notes === `Despesa: ${item.description}` ||
+              inv.notes === item.description
+            );
+            return (
+              <div key={item.id} className="flex items-center justify-between px-4 py-3 bg-card rounded-lg border hover:shadow-md transition-shadow">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">{item.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(item.date).toLocaleDateString("pt-BR")}
+                    {"category" in item && ` • ${(item as Expense).category}`}
+                    {"isBoleto" in item && (item as Expense).isBoleto && " • 📄 Boleto"}
+                  </p>
+                  {matchingInvoices.length > 0 && (
+                    <div className="flex items-center gap-1 mt-1">
+                      {matchingInvoices.map(inv => (
+                        <div key={inv.id} className="flex items-center gap-0.5 bg-muted rounded px-1.5 py-0.5">
+                          <FileText className="w-3 h-3 text-primary" />
+                          <span className="text-[10px] text-muted-foreground max-w-[80px] truncate">{inv.file_name}</span>
+                          <button onClick={() => viewInvoice(inv.file_path)} className="text-muted-foreground hover:text-primary" title="Visualizar">
+                            <Eye className="w-3 h-3" />
+                          </button>
+                          <button onClick={() => downloadInvoice(inv.file_path, inv.file_name)} className="text-muted-foreground hover:text-primary" title="Baixar">
+                            <Download className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`font-semibold text-sm tabular-nums ${tab === "expenses" ? "text-destructive" : "text-success"}`}>
+                    R$ {item.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  </span>
+                  <button
+                    onClick={async () => {
+                      tab === "expenses" ? await removeExp(item.id) : await removeRev(item.id);
+                      toast.success("Removido");
+                    }}
+                    className="text-muted-foreground hover:text-destructive transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className={`font-semibold text-sm tabular-nums ${tab === "expenses" ? "text-destructive" : "text-success"}`}>
-                  R$ {item.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                </span>
-                <button
-                  onClick={async () => {
-                    tab === "expenses" ? await removeExp(item.id) : await removeRev(item.id);
-                    toast.success("Removido");
-                  }}
-                  className="text-muted-foreground hover:text-destructive transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>

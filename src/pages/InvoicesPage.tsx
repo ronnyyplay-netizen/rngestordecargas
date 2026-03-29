@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useDrivers } from "@/hooks/use-store";
+import { useInvoices, viewInvoice, downloadInvoice, type Invoice } from "@/hooks/use-invoices";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -23,42 +23,17 @@ import { Upload, Camera, FileText, Trash2, Download, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
-interface Invoice {
-  id: string;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  file_size: number;
-  notes: string;
-  driver_id: string | null;
-  created_at: string;
-}
-
 const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png,.xml,.doc,.docx,.xlsx,.xls,.csv,.webp";
 
 export default function InvoicesPage() {
   const { drivers } = useDrivers();
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<string>("all");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchInvoices = useCallback(async () => {
-    let q = supabase
-      .from("invoices")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (selectedDriver !== "all") q = q.eq("driver_id", selectedDriver);
-    const { data } = await q;
-    if (data) setInvoices(data as Invoice[]);
-    setLoading(false);
-  }, [selectedDriver]);
-
-  useEffect(() => {
-    fetchInvoices();
-  }, [fetchInvoices]);
+  const driverId = selectedDriver !== "all" ? selectedDriver : undefined;
+  const { invoices, loading, refetch: fetchInvoices } = useInvoices(driverId);
 
   async function handleUpload(files: FileList | null) {
     if (!files) return;
@@ -103,33 +78,6 @@ export default function InvoicesPage() {
     await supabase.from("invoices").delete().eq("id", inv.id);
     toast.success("Nota removida!");
     fetchInvoices();
-  }
-
-  async function handleDownload(inv: Invoice) {
-    const { data } = await supabase.storage
-      .from("invoices")
-      .download(inv.file_path);
-    if (!data) {
-      toast.error("Erro ao baixar arquivo");
-      return;
-    }
-    const url = URL.createObjectURL(data);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = inv.file_name;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  async function handleView(inv: Invoice) {
-    const { data } = await supabase.storage
-      .from("invoices")
-      .createSignedUrl(inv.file_path, 300);
-    if (data?.signedUrl) {
-      window.open(data.signedUrl, "_blank");
-    } else {
-      toast.error("Erro ao gerar link de visualização");
-    }
   }
 
   function formatSize(bytes: number) {
@@ -227,6 +175,8 @@ export default function InvoicesPage() {
                     <TableHead className="hidden sm:table-cell">Tipo</TableHead>
                     <TableHead className="hidden sm:table-cell">Tamanho</TableHead>
                     <TableHead className="hidden md:table-cell">Motorista</TableHead>
+                    <TableHead className="hidden md:table-cell">Motorista</TableHead>
+                    <TableHead className="hidden lg:table-cell">Observação</TableHead>
                     <TableHead className="hidden sm:table-cell">Data</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
@@ -249,6 +199,9 @@ export default function InvoicesPage() {
                         <TableCell className="hidden md:table-cell text-xs">
                           {driverName}
                         </TableCell>
+                        <TableCell className="hidden lg:table-cell text-xs max-w-[150px] truncate">
+                          {inv.notes || "—"}
+                        </TableCell>
                         <TableCell className="hidden sm:table-cell text-xs">
                           {format(new Date(inv.created_at), "dd/MM/yyyy")}
                         </TableCell>
@@ -257,7 +210,7 @@ export default function InvoicesPage() {
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() => handleView(inv)}
+                              onClick={() => viewInvoice(inv.file_path)}
                               title="Visualizar"
                             >
                               <Eye className="w-4 h-4" />
@@ -265,7 +218,7 @@ export default function InvoicesPage() {
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() => handleDownload(inv)}
+                              onClick={() => downloadInvoice(inv.file_path, inv.file_name)}
                               title="Baixar"
                             >
                               <Download className="w-4 h-4" />
