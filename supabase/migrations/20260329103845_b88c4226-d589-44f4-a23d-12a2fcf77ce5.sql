@@ -1,0 +1,1 @@
+ALTER TABLE public.app_settings ALTER COLUMN company_name SET DEFAULT 'Minha Empresa';
