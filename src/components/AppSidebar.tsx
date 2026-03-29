@@ -1,5 +1,4 @@
-import { LayoutDashboard, Users, Calculator, Phone, Settings, FileText } from "lucide-react";
-import defaultLogo from "@/assets/galos-logo.png";
+import { LayoutDashboard, Users, Calculator, Phone, Settings, FileText, Truck } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useDrivers, useSettings } from "@/hooks/use-store";
 import { AddDriverDialog } from "@/components/AddDriverDialog";
@@ -33,7 +32,13 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarContent className="bg-sidebar">
         <div className="px-4 py-5 flex items-center gap-3">
-          <img src={settings.logoUrl || defaultLogo} alt="Logo" className="w-8 h-8 rounded-md object-contain" />
+          {settings.logoUrl ? (
+            <img src={settings.logoUrl} alt="Logo" className="w-8 h-8 rounded-md object-contain" />
+          ) : (
+            <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
+              <Truck className="w-4 h-4 text-primary" />
+            </div>
+          )}
           {!collapsed && (
             <span className="font-bold text-sm text-sidebar-foreground truncate">
               {settings.companyName}

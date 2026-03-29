@@ -32,7 +32,7 @@ export interface AppSettings {
   logoUrl: string;
 }
 
-const DEFAULT_SETTINGS: AppSettings = { companyName: "Galos Transportes", logoUrl: "" };
+const DEFAULT_SETTINGS: AppSettings = { companyName: "Minha Empresa", logoUrl: "" };
 
 export function useDrivers() {
   const [drivers, setDrivers] = useState<Driver[]>([]);

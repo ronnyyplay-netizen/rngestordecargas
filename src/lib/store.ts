@@ -36,7 +36,7 @@ const DEFAULT_DRIVERS: Driver[] = [
 ];
 
 const DEFAULT_SETTINGS: AppSettings = {
-  companyName: "Galos Transportes",
+  companyName: "Minha Empresa",
   logoUrl: "",
 };
 

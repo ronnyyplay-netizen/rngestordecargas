@@ -34,7 +34,7 @@ const revenueSchema = z.object({
 });
 
 const settingsSchema = z.object({
-  companyName: z.string().trim().min(1).max(200).default("Galos Transportes"),
+  companyName: z.string().trim().min(1).max(200).default("Minha Empresa"),
   logoUrl: z.string().max(500_000).refine(
     (val) => val === "" || val.startsWith("data:image/"),
     { message: "Logo must be a base64 data:image URL or empty" }
@@ -60,7 +60,7 @@ export default function SettingsPage() {
   const [synced, setSynced] = useState(false);
 
   // Sync local state when settings load from DB
-  if (!synced && settings.companyName !== "Galos Transportes" || (settings.companyName === "Galos Transportes" && !synced)) {
+  if (!synced) {
     if (settings.companyName !== name || settings.logoUrl !== logo) {
       setName(settings.companyName);
       setLogo(settings.logoUrl);
@@ -88,7 +88,7 @@ export default function SettingsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `backup-galos-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Backup exportado com sucesso!");
@@ -159,7 +159,7 @@ export default function SettingsPage() {
   }
 
   async function handleSave() {
-    await save({ companyName: name.trim() || "Galos Transportes", logoUrl: logo });
+    await save({ companyName: name.trim() || "Minha Empresa", logoUrl: logo });
     toast.success("Configurações salvas!");
   }
 
