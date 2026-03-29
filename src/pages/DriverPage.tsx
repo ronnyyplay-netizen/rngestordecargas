@@ -175,6 +175,26 @@ export default function DriverPage() {
               {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
             </select>
           )}
+          {tab === "revenue" && (
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.xml"
+                className="hidden"
+                onChange={(e) => setInvoiceFile(e.target.files?.[0] || null)}
+              />
+              <Button
+                type="button"
+                variant={invoiceFile ? "default" : "outline"}
+                className="w-full"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="w-4 h-4 mr-1" />
+                {invoiceFile ? invoiceFile.name.slice(0, 20) : "Nota Fiscal"}
+              </Button>
+            </div>
+          )}
           <Button onClick={tab === "expenses" ? handleAddExpense : handleAddRevenue} className="bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="w-4 h-4 mr-1" /> Adicionar
           </Button>
