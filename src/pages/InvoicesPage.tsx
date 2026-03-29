@@ -213,7 +213,7 @@ export default function InvoicesPage() {
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() => handleDownload(inv)}
+                              onClick={() => downloadInvoice(inv.file_path, inv.file_name)}
                               title="Baixar"
                             >
                               <Download className="w-4 h-4" />
