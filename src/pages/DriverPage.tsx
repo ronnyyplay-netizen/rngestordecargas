@@ -24,6 +24,8 @@ export default function DriverPage() {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [filterCategory, setFilterCategory] = useState("Todas");
+  const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Edit driver state
   const [editing, setEditing] = useState(false);
