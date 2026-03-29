@@ -175,6 +175,8 @@ export default function InvoicesPage() {
                     <TableHead className="hidden sm:table-cell">Tipo</TableHead>
                     <TableHead className="hidden sm:table-cell">Tamanho</TableHead>
                     <TableHead className="hidden md:table-cell">Motorista</TableHead>
+                    <TableHead className="hidden md:table-cell">Motorista</TableHead>
+                    <TableHead className="hidden lg:table-cell">Observação</TableHead>
                     <TableHead className="hidden sm:table-cell">Data</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
