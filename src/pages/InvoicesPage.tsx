@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useDrivers } from "@/hooks/use-store";
+import { useInvoices, viewInvoice, downloadInvoice } from "@/hooks/use-invoices";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -23,42 +23,17 @@ import { Upload, Camera, FileText, Trash2, Download, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
-interface Invoice {
-  id: string;
-  file_name: string;
-  file_path: string;
-  file_type: string;
-  file_size: number;
-  notes: string;
-  driver_id: string | null;
-  created_at: string;
-}
-
 const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png,.xml,.doc,.docx,.xlsx,.xls,.csv,.webp";
 
 export default function InvoicesPage() {
   const { drivers } = useDrivers();
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<string>("all");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchInvoices = useCallback(async () => {
-    let q = supabase
-      .from("invoices")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (selectedDriver !== "all") q = q.eq("driver_id", selectedDriver);
-    const { data } = await q;
-    if (data) setInvoices(data as Invoice[]);
-    setLoading(false);
-  }, [selectedDriver]);
-
-  useEffect(() => {
-    fetchInvoices();
-  }, [fetchInvoices]);
+  const driverId = selectedDriver !== "all" ? selectedDriver : undefined;
+  const { invoices, loading, refetch: fetchInvoices } = useInvoices(driverId);
 
   async function handleUpload(files: FileList | null) {
     if (!files) return;
