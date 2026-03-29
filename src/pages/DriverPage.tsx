@@ -121,6 +121,7 @@ export default function DriverPage() {
             notes: desc.trim(),
           });
           toast.success("Nota fiscal anexada!");
+          refetchInvoices();
         }
       } catch (err) {
         console.error(err);
