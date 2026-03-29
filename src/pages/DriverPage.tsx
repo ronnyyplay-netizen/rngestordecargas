@@ -67,6 +67,36 @@ export default function DriverPage() {
   async function handleAddRevenue() {
     if (!desc.trim() || !amount) return;
     await addRev({ description: desc.trim(), amount: parseFloat(amount), date, driverId: driver!.id });
+    
+    // Upload invoice file if selected
+    if (invoiceFile) {
+      try {
+        const user = (await supabase.auth.getUser()).data.user;
+        if (user) {
+          const ext = invoiceFile.name.split('.').pop();
+          const filePath = `${user.id}/${Date.now()}_${invoiceFile.name}`;
+          const { error: uploadError } = await supabase.storage.from('invoices').upload(filePath, invoiceFile);
+          if (uploadError) throw uploadError;
+          
+          await supabase.from('invoices').insert({
+            owner_id: user.id,
+            driver_id: driver!.id,
+            file_name: invoiceFile.name,
+            file_path: filePath,
+            file_type: invoiceFile.type,
+            file_size: invoiceFile.size,
+            notes: desc.trim(),
+          });
+          toast.success("Nota fiscal anexada!");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Erro ao enviar nota fiscal");
+      }
+      setInvoiceFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+    
     setDesc(""); setAmount("");
     toast.success("Receita adicionada");
   }
