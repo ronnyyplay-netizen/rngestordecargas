@@ -268,32 +268,55 @@ export default function DriverPage() {
         {(tab === "expenses" ? filteredExpenses : filteredRevenues).length === 0 ? (
           <p className="text-muted-foreground text-sm text-center py-8">Nenhum registro ainda.</p>
         ) : (
-          (tab === "expenses" ? filteredExpenses : filteredRevenues).map((item) => (
-            <div key={item.id} className="flex items-center justify-between px-4 py-3 bg-card rounded-lg border hover:shadow-md transition-shadow">
-              <div>
-                <p className="font-medium text-sm">{item.description}</p>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(item.date).toLocaleDateString("pt-BR")}
-                  {"category" in item && ` • ${(item as Expense).category}`}
-                  {"isBoleto" in item && (item as Expense).isBoleto && " • 📄 Boleto"}
-                </p>
+          (tab === "expenses" ? filteredExpenses : filteredRevenues).map((item) => {
+            const matchingInvoices = driverInvoices.filter(inv => 
+              inv.notes.includes(item.description) || 
+              inv.notes === `Despesa: ${item.description}` ||
+              inv.notes === item.description
+            );
+            return (
+              <div key={item.id} className="flex items-center justify-between px-4 py-3 bg-card rounded-lg border hover:shadow-md transition-shadow">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">{item.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(item.date).toLocaleDateString("pt-BR")}
+                    {"category" in item && ` • ${(item as Expense).category}`}
+                    {"isBoleto" in item && (item as Expense).isBoleto && " • 📄 Boleto"}
+                  </p>
+                  {matchingInvoices.length > 0 && (
+                    <div className="flex items-center gap-1 mt-1">
+                      {matchingInvoices.map(inv => (
+                        <div key={inv.id} className="flex items-center gap-0.5 bg-muted rounded px-1.5 py-0.5">
+                          <FileText className="w-3 h-3 text-primary" />
+                          <span className="text-[10px] text-muted-foreground max-w-[80px] truncate">{inv.file_name}</span>
+                          <button onClick={() => viewInvoice(inv.file_path)} className="text-muted-foreground hover:text-primary" title="Visualizar">
+                            <Eye className="w-3 h-3" />
+                          </button>
+                          <button onClick={() => downloadInvoice(inv.file_path, inv.file_name)} className="text-muted-foreground hover:text-primary" title="Baixar">
+                            <Download className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`font-semibold text-sm tabular-nums ${tab === "expenses" ? "text-destructive" : "text-success"}`}>
+                    R$ {item.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  </span>
+                  <button
+                    onClick={async () => {
+                      tab === "expenses" ? await removeExp(item.id) : await removeRev(item.id);
+                      toast.success("Removido");
+                    }}
+                    className="text-muted-foreground hover:text-destructive transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className={`font-semibold text-sm tabular-nums ${tab === "expenses" ? "text-destructive" : "text-success"}`}>
-                  R$ {item.amount.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                </span>
-                <button
-                  onClick={async () => {
-                    tab === "expenses" ? await removeExp(item.id) : await removeRev(item.id);
-                    toast.success("Removido");
-                  }}
-                  className="text-muted-foreground hover:text-destructive transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
