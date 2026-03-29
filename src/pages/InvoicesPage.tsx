@@ -199,6 +199,9 @@ export default function InvoicesPage() {
                         <TableCell className="hidden md:table-cell text-xs">
                           {driverName}
                         </TableCell>
+                        <TableCell className="hidden lg:table-cell text-xs max-w-[150px] truncate">
+                          {inv.notes || "—"}
+                        </TableCell>
                         <TableCell className="hidden sm:table-cell text-xs">
                           {format(new Date(inv.created_at), "dd/MM/yyyy")}
                         </TableCell>
