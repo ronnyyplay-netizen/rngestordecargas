@@ -42,7 +42,7 @@ export function useDrivers() {
 
   const fetch = useCallback(async () => {
     const { data } = await supabase.from("drivers").select("*").order("created_at");
-    if (data) setDrivers(data.map(d => ({ id: d.id, name: d.name, phone: d.phone, truck: d.truck })));
+    if (data) setDrivers(data.map(d => ({ id: d.id, name: d.name, phone: d.phone, truck: d.truck, plate: (d as any).plate || '', model: (d as any).model || '' })));
     setLoading(false);
   }, []);
 
