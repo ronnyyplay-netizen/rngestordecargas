@@ -51,7 +51,7 @@ export function useDrivers() {
   const add = async (d: Omit<Driver, "id">) => {
     const user = (await supabase.auth.getUser()).data.user;
     if (!user) return;
-    await supabase.from("drivers").insert({ owner_id: user.id, name: d.name, phone: d.phone, truck: d.truck });
+    await supabase.from("drivers").insert({ owner_id: user.id, name: d.name, phone: d.phone, truck: d.truck, plate: d.plate, model: d.model } as any);
     await fetch();
   };
 
