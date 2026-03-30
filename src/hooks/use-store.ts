@@ -7,6 +7,8 @@ export interface Driver {
   name: string;
   phone: string;
   truck: string;
+  plate: string;
+  model: string;
 }
 
 export interface Expense {
@@ -40,7 +42,7 @@ export function useDrivers() {
 
   const fetch = useCallback(async () => {
     const { data } = await supabase.from("drivers").select("*").order("created_at");
-    if (data) setDrivers(data.map(d => ({ id: d.id, name: d.name, phone: d.phone, truck: d.truck })));
+    if (data) setDrivers(data.map(d => ({ id: d.id, name: d.name, phone: d.phone, truck: d.truck, plate: (d as any).plate || '', model: (d as any).model || '' })));
     setLoading(false);
   }, []);
 
@@ -49,12 +51,12 @@ export function useDrivers() {
   const add = async (d: Omit<Driver, "id">) => {
     const user = (await supabase.auth.getUser()).data.user;
     if (!user) return;
-    await supabase.from("drivers").insert({ owner_id: user.id, name: d.name, phone: d.phone, truck: d.truck });
+    await supabase.from("drivers").insert({ owner_id: user.id, name: d.name, phone: d.phone, truck: d.truck, plate: d.plate, model: d.model } as any);
     await fetch();
   };
 
   const update = async (d: Driver) => {
-    await supabase.from("drivers").update({ name: d.name, phone: d.phone, truck: d.truck }).eq("id", d.id);
+    await supabase.from("drivers").update({ name: d.name, phone: d.phone, truck: d.truck, plate: d.plate, model: d.model } as any).eq("id", d.id);
     await fetch();
   };
 

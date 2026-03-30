@@ -36,12 +36,22 @@ export default function DriverPage() {
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [editTruck, setEditTruck] = useState("");
+  const [editPlate, setEditPlate] = useState("");
+  const [editModel, setEditModel] = useState("");
+  const [editCustomModel, setEditCustomModel] = useState("");
+
+  const VEHICLE_MODELS = ["VAN", "FIORINO", "CARRO", "CAMINHÃO"];
 
   useEffect(() => {
     if (driver) {
       setEditName(driver.name);
       setEditPhone(driver.phone);
       setEditTruck(driver.truck);
+      setEditPlate(driver.plate || "");
+      const m = driver.model || "";
+      if (VEHICLE_MODELS.includes(m)) { setEditModel(m); setEditCustomModel(""); }
+      else if (m) { setEditModel("custom"); setEditCustomModel(m); }
+      else { setEditModel(""); setEditCustomModel(""); }
     }
   }, [driver?.id]);
 
@@ -49,7 +59,8 @@ export default function DriverPage() {
 
   async function handleSaveDriver() {
     if (!editName.trim()) { toast.error("Nome é obrigatório"); return; }
-    await updateDriver({ id: driver!.id, name: editName.trim(), phone: editPhone.trim(), truck: editTruck.trim() });
+    const finalModel = editModel === "custom" ? editCustomModel.trim() : editModel;
+    await updateDriver({ id: driver!.id, name: editName.trim(), phone: editPhone.trim(), truck: editTruck.trim(), plate: editPlate.trim(), model: finalModel });
     setEditing(false);
     toast.success("Dados do motorista atualizados!");
   }
@@ -151,7 +162,7 @@ export default function DriverPage() {
       {editing ? (
         <div className="stat-card space-y-3 animate-fade-in-up">
           <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Editar Motorista</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium mb-1 block">Nome</label>
               <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nome do motorista" />
@@ -161,8 +172,25 @@ export default function DriverPage() {
               <Input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="5511999999999" />
             </div>
             <div>
-              <label className="text-xs font-medium mb-1 block">Caminhão / Placa</label>
-              <Input value={editTruck} onChange={(e) => setEditTruck(e.target.value)} placeholder="Caminhão / Placa" />
+              <label className="text-xs font-medium mb-1 block">Modelo do Veículo</label>
+              <select
+                value={editModel}
+                onChange={(e) => setEditModel(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="">Selecione...</option>
+                {VEHICLE_MODELS.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+                <option value="custom">Digitar manualmente</option>
+              </select>
+              {editModel === "custom" && (
+                <Input value={editCustomModel} onChange={(e) => setEditCustomModel(e.target.value)} placeholder="Ex: Sprinter 415" className="mt-2" />
+              )}
+            </div>
+            <div>
+              <label className="text-xs font-medium mb-1 block">Placa</label>
+              <Input value={editPlate} onChange={(e) => setEditPlate(e.target.value.toUpperCase())} placeholder="ABC1D23" maxLength={7} />
             </div>
           </div>
           <div className="flex gap-2">
@@ -174,7 +202,9 @@ export default function DriverPage() {
         <div className="animate-fade-in-up flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold">{driver.name}</h1>
-            <p className="text-muted-foreground text-sm">{driver.truck}</p>
+            <p className="text-muted-foreground text-sm">
+              {[driver.model, driver.plate].filter(Boolean).join(" • ") || driver.truck || "Sem veículo"}
+            </p>
             {driver.phone && <p className="text-muted-foreground text-xs mt-0.5">{driver.phone}</p>}
           </div>
           <Button size="sm" variant="outline" onClick={() => setEditing(true)}>

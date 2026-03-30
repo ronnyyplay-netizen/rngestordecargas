@@ -45,25 +45,31 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          model: string
           name: string
           owner_id: string
           phone: string
+          plate: string
           truck: string
         }
         Insert: {
           created_at?: string
           id?: string
+          model?: string
           name: string
           owner_id: string
           phone?: string
+          plate?: string
           truck?: string
         }
         Update: {
           created_at?: string
           id?: string
+          model?: string
           name?: string
           owner_id?: string
           phone?: string
+          plate?: string
           truck?: string
         }
         Relationships: []
