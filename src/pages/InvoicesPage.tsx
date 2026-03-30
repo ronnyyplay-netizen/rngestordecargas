@@ -43,7 +43,8 @@ export default function InvoicesPage() {
 
     for (const file of Array.from(files)) {
       const ext = file.name.split(".").pop() || "";
-      const path = `${user.id}/${Date.now()}_${file.name}`;
+      const safeName = file.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${user.id}/${Date.now()}_${safeName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("invoices")

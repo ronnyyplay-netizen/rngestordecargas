@@ -106,8 +106,7 @@ export default function DriverPage() {
       try {
         const user = (await supabase.auth.getUser()).data.user;
         if (user) {
-          const ext = invoiceFile.name.split('.').pop();
-          const filePath = `${user.id}/${Date.now()}_${invoiceFile.name}`;
+          const filePath = `${user.id}/${Date.now()}_${sanitizeFileName(invoiceFile.name)}`;
           const { error: uploadError } = await supabase.storage.from('invoices').upload(filePath, invoiceFile);
           if (uploadError) throw uploadError;
           
