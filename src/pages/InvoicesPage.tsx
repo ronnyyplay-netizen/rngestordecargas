@@ -4,6 +4,7 @@ import { useDrivers } from "@/hooks/use-store";
 import { useInvoices, viewInvoice, downloadInvoice, type Invoice } from "@/hooks/use-invoices";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -19,21 +20,37 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Upload, Camera, FileText, Trash2, Download, Eye } from "lucide-react";
+import { Upload, Camera, FileText, Trash2, Download, Eye, Search } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
 const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png,.xml,.doc,.docx,.xlsx,.xls,.csv,.webp";
 
+function sanitizeFileName(name: string) {
+  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
 export default function InvoicesPage() {
   const { drivers } = useDrivers();
   const [uploading, setUploading] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<string>("all");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const driverId = selectedDriver !== "all" ? selectedDriver : undefined;
   const { invoices, loading, refetch: fetchInvoices } = useInvoices(driverId);
+
+  const filteredInvoices = invoices.filter((inv) => {
+    const matchesSearch = searchTerm === "" || 
+      inv.file_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      inv.notes?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = filterType === "all" || inv.file_type.toLowerCase() === filterType;
+    return matchesSearch && matchesType;
+  });
+
+  const fileTypes = [...new Set(invoices.map((i) => i.file_type.toLowerCase()))].sort();
 
   async function handleUpload(files: FileList | null) {
     if (!files) return;
@@ -43,7 +60,7 @@ export default function InvoicesPage() {
 
     for (const file of Array.from(files)) {
       const ext = file.name.split(".").pop() || "";
-      const safeName = file.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "_");
+      const safeName = sanitizeFileName(file.name);
       const path = `${user.id}/${Date.now()}_${safeName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -155,6 +172,36 @@ export default function InvoicesPage() {
         </CardContent>
       </Card>
 
+      {/* Filters */}
+      <Card>
+        <CardContent className="pt-4">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nome ou observação..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Tipo de arquivo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os tipos</SelectItem>
+                {fileTypes.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t.toUpperCase()}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Invoices list */}
       <Card>
         <CardContent className="p-0">
@@ -162,7 +209,7 @@ export default function InvoicesPage() {
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
             </div>
-          ) : invoices.length === 0 ? (
+          ) : filteredInvoices.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <FileText className="w-10 h-10 mx-auto mb-2 opacity-40" />
               <p>Nenhuma nota fiscal encontrada</p>
@@ -176,14 +223,13 @@ export default function InvoicesPage() {
                     <TableHead className="hidden sm:table-cell">Tipo</TableHead>
                     <TableHead className="hidden sm:table-cell">Tamanho</TableHead>
                     <TableHead className="hidden md:table-cell">Motorista</TableHead>
-                    <TableHead className="hidden md:table-cell">Motorista</TableHead>
                     <TableHead className="hidden lg:table-cell">Observação</TableHead>
                     <TableHead className="hidden sm:table-cell">Data</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {invoices.map((inv) => {
+                  {filteredInvoices.map((inv) => {
                     const driverName =
                       drivers.find((d) => d.id === inv.driver_id)?.name || "—";
                     return (
