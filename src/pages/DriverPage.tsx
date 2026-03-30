@@ -202,7 +202,9 @@ export default function DriverPage() {
         <div className="animate-fade-in-up flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold">{driver.name}</h1>
-            <p className="text-muted-foreground text-sm">{driver.truck}</p>
+            <p className="text-muted-foreground text-sm">
+              {[driver.model, driver.plate].filter(Boolean).join(" • ") || driver.truck || "Sem veículo"}
+            </p>
             {driver.phone && <p className="text-muted-foreground text-xs mt-0.5">{driver.phone}</p>}
           </div>
           <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
