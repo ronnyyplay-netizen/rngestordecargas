@@ -59,7 +59,8 @@ export default function DriverPage() {
 
   async function handleSaveDriver() {
     if (!editName.trim()) { toast.error("Nome é obrigatório"); return; }
-    await updateDriver({ id: driver!.id, name: editName.trim(), phone: editPhone.trim(), truck: editTruck.trim() });
+    const finalModel = editModel === "custom" ? editCustomModel.trim() : editModel;
+    await updateDriver({ id: driver!.id, name: editName.trim(), phone: editPhone.trim(), truck: editTruck.trim(), plate: editPlate.trim(), model: finalModel });
     setEditing(false);
     toast.success("Dados do motorista atualizados!");
   }
