@@ -56,7 +56,7 @@ export function useDrivers() {
   };
 
   const update = async (d: Driver) => {
-    await supabase.from("drivers").update({ name: d.name, phone: d.phone, truck: d.truck }).eq("id", d.id);
+    await supabase.from("drivers").update({ name: d.name, phone: d.phone, truck: d.truck, plate: d.plate, model: d.model } as any).eq("id", d.id);
     await fetch();
   };
 
