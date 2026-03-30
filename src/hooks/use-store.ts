@@ -7,6 +7,8 @@ export interface Driver {
   name: string;
   phone: string;
   truck: string;
+  plate: string;
+  model: string;
 }
 
 export interface Expense {
