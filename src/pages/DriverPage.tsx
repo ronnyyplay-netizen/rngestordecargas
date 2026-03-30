@@ -36,12 +36,22 @@ export default function DriverPage() {
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [editTruck, setEditTruck] = useState("");
+  const [editPlate, setEditPlate] = useState("");
+  const [editModel, setEditModel] = useState("");
+  const [editCustomModel, setEditCustomModel] = useState("");
+
+  const VEHICLE_MODELS = ["VAN", "FIORINO", "CARRO", "CAMINHÃO"];
 
   useEffect(() => {
     if (driver) {
       setEditName(driver.name);
       setEditPhone(driver.phone);
       setEditTruck(driver.truck);
+      setEditPlate(driver.plate || "");
+      const m = driver.model || "";
+      if (VEHICLE_MODELS.includes(m)) { setEditModel(m); setEditCustomModel(""); }
+      else if (m) { setEditModel("custom"); setEditCustomModel(m); }
+      else { setEditModel(""); setEditCustomModel(""); }
     }
   }, [driver?.id]);
 
