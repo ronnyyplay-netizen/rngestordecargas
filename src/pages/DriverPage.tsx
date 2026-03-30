@@ -61,6 +61,10 @@ export default function DriverPage() {
   const filteredExpenses = filterCategory === "Todas" ? expenses : expenses.filter(e => e.category === filterCategory);
   const filteredRevenues = revenues;
 
+  function sanitizeFileName(name: string) {
+    return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "_");
+  }
+
   async function handleAddExpense() {
     if (!desc.trim() || !amount) return;
     await addExp({ description: desc.trim(), amount: parseFloat(amount), date, category, driverId: driver!.id });
@@ -69,7 +73,7 @@ export default function DriverPage() {
       try {
         const user = (await supabase.auth.getUser()).data.user;
         if (user) {
-          const filePath = `${user.id}/${Date.now()}_${expInvoiceFile.name}`;
+          const filePath = `${user.id}/${Date.now()}_${sanitizeFileName(expInvoiceFile.name)}`;
           const { error: uploadError } = await supabase.storage.from('invoices').upload(filePath, expInvoiceFile);
           if (uploadError) throw uploadError;
           
@@ -106,8 +110,7 @@ export default function DriverPage() {
       try {
         const user = (await supabase.auth.getUser()).data.user;
         if (user) {
-          const ext = invoiceFile.name.split('.').pop();
-          const filePath = `${user.id}/${Date.now()}_${invoiceFile.name}`;
+          const filePath = `${user.id}/${Date.now()}_${sanitizeFileName(invoiceFile.name)}`;
           const { error: uploadError } = await supabase.storage.from('invoices').upload(filePath, invoiceFile);
           if (uploadError) throw uploadError;
           
