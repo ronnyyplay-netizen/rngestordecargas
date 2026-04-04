@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Calculator, Phone, Settings, FileText, Truck } from "lucide-react";
+import { LayoutDashboard, Users, Phone, Settings, FileText, Truck } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useDrivers, useSettings } from "@/hooks/use-store";
 import { AddDriverDialog } from "@/components/AddDriverDialog";
@@ -22,7 +22,7 @@ export function AppSidebar() {
 
   const mainItems = [
     { title: "Dashboard", url: "/", icon: LayoutDashboard },
-    { title: "Calculadora", url: "/calculadora", icon: Calculator },
+    
     { title: "Contato", url: "/contato", icon: Phone },
     { title: "Notas Fiscais", url: "/notas-fiscais", icon: FileText },
     { title: "Configurações", url: "/configuracoes", icon: Settings },

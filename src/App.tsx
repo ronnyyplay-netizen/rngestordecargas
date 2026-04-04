@@ -7,7 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import DriverPage from "@/pages/DriverPage";
-import CalculatorPage from "@/pages/CalculatorPage";
+
 import ContactPage from "@/pages/ContactPage";
 import SettingsPage from "@/pages/SettingsPage";
 import InvoicesPage from "@/pages/InvoicesPage";
@@ -36,7 +36,7 @@ function AppRoutes() {
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/motorista/:id" element={<DriverPage />} />
-        <Route path="/calculadora" element={<CalculatorPage />} />
+        
         <Route path="/contato" element={<ContactPage />} />
         <Route path="/notas-fiscais" element={<InvoicesPage />} />
         <Route path="/configuracoes" element={<SettingsPage />} />
