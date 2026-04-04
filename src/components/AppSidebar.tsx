@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Calculator, Phone, Settings, FileText, Truck } from "lucide-react";
+import { LayoutDashboard, Users, Phone, Settings, FileText, Truck } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useDrivers, useSettings } from "@/hooks/use-store";
 import { AddDriverDialog } from "@/components/AddDriverDialog";
