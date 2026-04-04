@@ -12,8 +12,38 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [accessCode, setAccessCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [useAccessCode, setUseAccessCode] = useState(false);
+
+  const ACCESS_CODE = "Rn15002442";
+
+  async function handleAccessCode(e: React.FormEvent) {
+    e.preventDefault();
+    if (accessCode.trim() !== ACCESS_CODE) {
+      toast.error("Código de acesso incorreto.");
+      return;
+    }
+    setSubmitting(true);
+    // Login with a fixed internal account
+    const ok = await login("acesso@sistema.local", ACCESS_CODE);
+    setSubmitting(false);
+    if (!ok) {
+      // Auto-create account on first use
+      const { error } = await supabase.auth.signUp({
+        email: "acesso@sistema.local",
+        password: ACCESS_CODE,
+      });
+      if (error) {
+        toast.error("Erro ao acessar. Tente novamente.");
+        return;
+      }
+      toast.success("Acesso liberado!");
+    } else {
+      toast.success("Acesso liberado!");
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -58,35 +88,54 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Email</label>
-              <Input type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1.5 block">Senha</label>
-              <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={isSignUp ? "new-password" : "current-password"} />
-            </div>
-            <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : isSignUp ? (
-                <UserPlus className="w-4 h-4 mr-2" />
-              ) : (
-                <LogIn className="w-4 h-4 mr-2" />
-              )}
-              {isSignUp ? "Criar Conta" : "Entrar"}
-            </Button>
-          </form>
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
-              onClick={() => setIsSignUp(!isSignUp)}
-            >
-              {isSignUp ? "Já tem conta? Faça login" : "Não tem conta? Cadastre-se"}
-            </button>
-          </div>
+          {useAccessCode ? (
+            <form onSubmit={handleAccessCode} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Código de Acesso</label>
+                <Input type="password" placeholder="Digite o código" value={accessCode} onChange={(e) => setAccessCode(e.target.value)} autoComplete="off" />
+              </div>
+              <Button type="submit" className="w-full" disabled={submitting}>
+                {submitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <LogIn className="w-4 h-4 mr-2" />}
+                Acessar
+              </Button>
+              <div className="text-center">
+                <button type="button" className="text-sm text-muted-foreground hover:text-foreground transition-colors underline" onClick={() => setUseAccessCode(false)}>
+                  Entrar com email e senha
+                </button>
+              </div>
+            </form>
+          ) : (
+            <>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Email</label>
+                  <Input type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Senha</label>
+                  <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={isSignUp ? "new-password" : "current-password"} />
+                </div>
+                <Button type="submit" className="w-full" disabled={submitting}>
+                  {submitting ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : isSignUp ? (
+                    <UserPlus className="w-4 h-4 mr-2" />
+                  ) : (
+                    <LogIn className="w-4 h-4 mr-2" />
+                  )}
+                  {isSignUp ? "Criar Conta" : "Entrar"}
+                </Button>
+              </form>
+              <div className="mt-4 text-center space-y-2">
+                <button type="button" className="text-sm text-muted-foreground hover:text-foreground transition-colors underline block mx-auto" onClick={() => setIsSignUp(!isSignUp)}>
+                  {isSignUp ? "Já tem conta? Faça login" : "Não tem conta? Cadastre-se"}
+                </button>
+                <button type="button" className="text-sm text-muted-foreground hover:text-foreground transition-colors underline block mx-auto" onClick={() => setUseAccessCode(true)}>
+                  Acessar com código
+                </button>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -59,7 +59,7 @@ export default function Dashboard() {
     { label: "Faturamento", value: totalRevenues, icon: DollarSign, color: "text-accent" },
     { label: "Despesas", value: totalExpenses, icon: TrendingDown, color: "text-destructive" },
     { label: "Lucro", value: profit, icon: TrendingUp, color: profit >= 0 ? "text-success" : "text-destructive" },
-    { label: "Caminhões", value: drivers.length, icon: Truck, color: "text-primary", isCurrency: false },
+    { label: "Veículos", value: drivers.length, icon: Truck, color: "text-primary", isCurrency: false },
   ];
 
   const monthlyData = useMemo(() => {
