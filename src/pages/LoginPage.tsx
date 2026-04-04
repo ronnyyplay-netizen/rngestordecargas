@@ -12,8 +12,38 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [accessCode, setAccessCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [useAccessCode, setUseAccessCode] = useState(false);
+
+  const ACCESS_CODE = "Rn15002442";
+
+  async function handleAccessCode(e: React.FormEvent) {
+    e.preventDefault();
+    if (accessCode.trim() !== ACCESS_CODE) {
+      toast.error("Código de acesso incorreto.");
+      return;
+    }
+    setSubmitting(true);
+    // Login with a fixed internal account
+    const ok = await login("acesso@sistema.local", ACCESS_CODE);
+    setSubmitting(false);
+    if (!ok) {
+      // Auto-create account on first use
+      const { error } = await supabase.auth.signUp({
+        email: "acesso@sistema.local",
+        password: ACCESS_CODE,
+      });
+      if (error) {
+        toast.error("Erro ao acessar. Tente novamente.");
+        return;
+      }
+      toast.success("Acesso liberado!");
+    } else {
+      toast.success("Acesso liberado!");
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
