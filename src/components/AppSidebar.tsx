@@ -22,7 +22,7 @@ export function AppSidebar() {
 
   const mainItems = [
     { title: "Dashboard", url: "/", icon: LayoutDashboard },
-    { title: "Calculadora", url: "/calculadora", icon: Calculator },
+    
     { title: "Contato", url: "/contato", icon: Phone },
     { title: "Notas Fiscais", url: "/notas-fiscais", icon: FileText },
     { title: "Configurações", url: "/configuracoes", icon: Settings },

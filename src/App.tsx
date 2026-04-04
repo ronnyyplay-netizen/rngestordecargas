@@ -36,7 +36,7 @@ function AppRoutes() {
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/motorista/:id" element={<DriverPage />} />
-        <Route path="/calculadora" element={<CalculatorPage />} />
+        
         <Route path="/contato" element={<ContactPage />} />
         <Route path="/notas-fiscais" element={<InvoicesPage />} />
         <Route path="/configuracoes" element={<SettingsPage />} />
