@@ -279,10 +279,10 @@ export default function DriverPage() {
         </div>
       </div>
 
-      {tab === "expenses" && (
-        <div className="flex flex-wrap items-center gap-2 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
-          <div className="flex items-center gap-2 mr-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
+      <div className="flex flex-wrap items-center gap-2 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
+        <div className="flex items-center gap-2 mr-2">
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          {tab === "expenses" && (
             <select
               className="flex h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm"
               value={filterCategory}
@@ -291,18 +291,36 @@ export default function DriverPage() {
               <option>Todas</option>
               {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
             </select>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => exportToPDF(exportExpenses, `${driver.name} - Despesas${filterCategory !== "Todas" ? ` (${filterCategory})` : ""}`)}>
-            <FileText className="w-4 h-4 mr-1" /> PDF
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => exportToDoc(exportExpenses, `${driver.name} - Despesas${filterCategory !== "Todas" ? ` (${filterCategory})` : ""}`)}>
-            <File className="w-4 h-4 mr-1" /> DOC
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => exportToExcel(exportExpenses, `${driver.name} - Despesas${filterCategory !== "Todas" ? ` (${filterCategory})` : ""}`)}>
-            <FileSpreadsheet className="w-4 h-4 mr-1" /> Excel
-          </Button>
+          )}
+          <select
+            className="flex h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm"
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(e.target.value)}
+          >
+            <option value="Todos">Todos os meses</option>
+            {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
+          </select>
         </div>
-      )}
+        {(() => {
+          const data = tab === "expenses" ? filteredExpenses : filteredRevenues.map(r => ({ ...r, category: "Receita" })) as Expense[];
+          const label = tab === "expenses" ? "Despesas" : "Receitas";
+          const suffix = `${filterCategory !== "Todas" && tab === "expenses" ? ` (${filterCategory})` : ""}${filterMonth !== "Todos" ? ` - ${filterMonth}` : ""}`;
+          const title = `${driver.name} - ${label}${suffix}`;
+          return (
+            <>
+              <Button variant="outline" size="sm" onClick={() => exportToPDF(data, title)}>
+                <FileText className="w-4 h-4 mr-1" /> PDF
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => exportToDoc(data, title)}>
+                <File className="w-4 h-4 mr-1" /> DOC
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => exportToExcel(data, title)}>
+                <FileSpreadsheet className="w-4 h-4 mr-1" /> Excel
+              </Button>
+            </>
+          );
+        })()}
+      </div>
 
       <div className="space-y-2 animate-fade-in-up" style={{ animationDelay: "480ms" }}>
         {(tab === "expenses" ? filteredExpenses : filteredRevenues).length === 0 ? (
