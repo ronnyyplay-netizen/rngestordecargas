@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Save, Upload, Download, FolderUp } from "lucide-react";
+import { Save, Upload, Download, FolderUp, KeyRound, Palette } from "lucide-react";
 import { z } from "zod";
+import { COLOR_THEMES, applyColorTheme, getStoredColorTheme, type ColorTheme } from "@/lib/theme";
 
 // Validation schemas for backup import
 const driverSchema = z.object({
