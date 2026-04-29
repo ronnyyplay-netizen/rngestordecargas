@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Save, Upload, Download, FolderUp } from "lucide-react";
+import { Save, Upload, Download, FolderUp, KeyRound, Palette } from "lucide-react";
 import { z } from "zod";
+import { COLOR_THEMES, applyColorTheme, getStoredColorTheme, type ColorTheme } from "@/lib/theme";
 
 // Validation schemas for backup import
 const driverSchema = z.object({
@@ -58,6 +59,10 @@ export default function SettingsPage() {
   const [logo, setLogo] = useState(settings.logoUrl);
   const importRef = useRef<HTMLInputElement>(null);
   const [synced, setSynced] = useState(false);
+  const [colorTheme, setColorTheme] = useState<ColorTheme>(getStoredColorTheme());
+  const [currentCode, setCurrentCode] = useState("");
+  const [newCode, setNewCode] = useState("");
+  const [confirmCode, setConfirmCode] = useState("");
 
   // Sync local state when settings load from DB
   if (!synced) {
@@ -66,6 +71,22 @@ export default function SettingsPage() {
       setLogo(settings.logoUrl);
     }
     setSynced(true);
+  }
+
+  function handleChangeTheme(theme: ColorTheme) {
+    setColorTheme(theme);
+    applyColorTheme(theme);
+    toast.success("Tema atualizado!");
+  }
+
+  function handleChangeAccessCode() {
+    const stored = localStorage.getItem("access-code") || "Rn15002442";
+    if (currentCode !== stored) { toast.error("Código atual incorreto."); return; }
+    if (newCode.trim().length < 6) { toast.error("O novo código deve ter ao menos 6 caracteres."); return; }
+    if (newCode !== confirmCode) { toast.error("Os códigos não coincidem."); return; }
+    localStorage.setItem("access-code", newCode.trim());
+    setCurrentCode(""); setNewCode(""); setConfirmCode("");
+    toast.success("Código de acesso atualizado!");
   }
 
   function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -206,6 +227,46 @@ export default function SettingsPage() {
           <input ref={importRef} type="file" className="hidden" accept=".json" onChange={handleImportBackup} />
         </div>
       </div>
+
+      <div className="stat-card space-y-4 animate-fade-in-up" style={{ animationDelay: "300ms" }}>
+        <h2 className="font-semibold flex items-center gap-2"><Palette className="w-4 h-4" /> Tema de Cores</h2>
+        <p className="text-muted-foreground text-sm">Escolha a paleta de cores do sistema.</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {COLOR_THEMES.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => handleChangeTheme(t.id)}
+              className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all ${colorTheme === t.id ? "bg-primary text-primary-foreground border-primary" : "bg-muted hover:bg-muted/70 border-border"}`}
+            >
+              {t.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="stat-card space-y-4 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
+        <h2 className="font-semibold flex items-center gap-2"><KeyRound className="w-4 h-4" /> Código de Acesso</h2>
+        <p className="text-muted-foreground text-sm">Altere o código usado para entrar no sistema.</p>
+        <div className="space-y-3">
+          <div>
+            <label className="text-sm font-medium mb-1.5 block">Código atual</label>
+            <Input type="password" value={currentCode} onChange={(e) => setCurrentCode(e.target.value)} autoComplete="off" />
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-1.5 block">Novo código</label>
+            <Input type="password" value={newCode} onChange={(e) => setNewCode(e.target.value)} autoComplete="off" />
+          </div>
+          <div>
+            <label className="text-sm font-medium mb-1.5 block">Confirmar novo código</label>
+            <Input type="password" value={confirmCode} onChange={(e) => setConfirmCode(e.target.value)} autoComplete="off" />
+          </div>
+          <Button onClick={handleChangeAccessCode} className="w-full">
+            <Save className="w-4 h-4 mr-2" /> Atualizar Código
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
+

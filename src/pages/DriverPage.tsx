@@ -26,6 +26,7 @@ export default function DriverPage() {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [filterCategory, setFilterCategory] = useState("Todas");
+  const [filterMonth, setFilterMonth] = useState<string>("Todos");
   const [invoiceFile, setInvoiceFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const expFileInputRef = useRef<HTMLInputElement>(null);
@@ -69,8 +70,14 @@ export default function DriverPage() {
   const totalRev = revenues.reduce((s, r) => s + r.amount, 0);
   const profit = totalRev - totalExp;
 
-  const filteredExpenses = filterCategory === "Todas" ? expenses : expenses.filter(e => e.category === filterCategory);
-  const filteredRevenues = revenues;
+  const MONTHS = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  const matchesMonth = (dateStr: string) => {
+    if (filterMonth === "Todos") return true;
+    const m = new Date(dateStr).getMonth();
+    return MONTHS[m] === filterMonth;
+  };
+  const filteredExpenses = expenses.filter(e => (filterCategory === "Todas" || e.category === filterCategory) && matchesMonth(e.date));
+  const filteredRevenues = revenues.filter(r => matchesMonth(r.date));
 
   function sanitizeFileName(name: string) {
     return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -155,7 +162,7 @@ export default function DriverPage() {
     { label: "Lucro", value: profit, icon: TrendingUp, color: profit >= 0 ? "text-success" : "text-destructive" },
   ];
 
-  const exportExpenses = filteredExpenses;
+  
 
   return (
     <div className="space-y-6">
@@ -272,10 +279,10 @@ export default function DriverPage() {
         </div>
       </div>
 
-      {tab === "expenses" && (
-        <div className="flex flex-wrap items-center gap-2 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
-          <div className="flex items-center gap-2 mr-2">
-            <Filter className="w-4 h-4 text-muted-foreground" />
+      <div className="flex flex-wrap items-center gap-2 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
+        <div className="flex items-center gap-2 mr-2">
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          {tab === "expenses" && (
             <select
               className="flex h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm"
               value={filterCategory}
@@ -284,18 +291,36 @@ export default function DriverPage() {
               <option>Todas</option>
               {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
             </select>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => exportToPDF(exportExpenses, `${driver.name} - Despesas${filterCategory !== "Todas" ? ` (${filterCategory})` : ""}`)}>
-            <FileText className="w-4 h-4 mr-1" /> PDF
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => exportToDoc(exportExpenses, `${driver.name} - Despesas${filterCategory !== "Todas" ? ` (${filterCategory})` : ""}`)}>
-            <File className="w-4 h-4 mr-1" /> DOC
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => exportToExcel(exportExpenses, `${driver.name} - Despesas${filterCategory !== "Todas" ? ` (${filterCategory})` : ""}`)}>
-            <FileSpreadsheet className="w-4 h-4 mr-1" /> Excel
-          </Button>
+          )}
+          <select
+            className="flex h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm"
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(e.target.value)}
+          >
+            <option value="Todos">Todos os meses</option>
+            {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
+          </select>
         </div>
-      )}
+        {(() => {
+          const data = tab === "expenses" ? filteredExpenses : filteredRevenues.map(r => ({ ...r, category: "Receita" })) as Expense[];
+          const label = tab === "expenses" ? "Despesas" : "Receitas";
+          const suffix = `${filterCategory !== "Todas" && tab === "expenses" ? ` (${filterCategory})` : ""}${filterMonth !== "Todos" ? ` - ${filterMonth}` : ""}`;
+          const title = `${driver.name} - ${label}${suffix}`;
+          return (
+            <>
+              <Button variant="outline" size="sm" onClick={() => exportToPDF(data, title)}>
+                <FileText className="w-4 h-4 mr-1" /> PDF
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => exportToDoc(data, title)}>
+                <File className="w-4 h-4 mr-1" /> DOC
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => exportToExcel(data, title)}>
+                <FileSpreadsheet className="w-4 h-4 mr-1" /> Excel
+              </Button>
+            </>
+          );
+        })()}
+      </div>
 
       <div className="space-y-2 animate-fade-in-up" style={{ animationDelay: "480ms" }}>
         {(tab === "expenses" ? filteredExpenses : filteredRevenues).length === 0 ? (

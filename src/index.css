@@ -94,6 +94,82 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
   }
+
+  /* ===== Theme: Emerald ===== */
+  .theme-emerald {
+    --primary: 158 64% 28%;
+    --primary-foreground: 150 60% 96%;
+    --accent: 142 70% 45%;
+    --accent-foreground: 158 64% 12%;
+    --ring: 158 64% 28%;
+    --sidebar-background: 158 50% 14%;
+    --sidebar-primary: 142 70% 45%;
+    --sidebar-accent: 158 45% 22%;
+    --sidebar-ring: 142 70% 45%;
+  }
+  .theme-emerald.dark {
+    --primary: 142 70% 45%;
+    --primary-foreground: 158 60% 8%;
+    --accent: 142 70% 45%;
+    --ring: 142 70% 45%;
+  }
+
+  /* ===== Theme: Violet ===== */
+  .theme-violet {
+    --primary: 262 60% 32%;
+    --primary-foreground: 270 80% 97%;
+    --accent: 280 90% 60%;
+    --accent-foreground: 262 60% 12%;
+    --ring: 262 60% 32%;
+    --sidebar-background: 262 45% 18%;
+    --sidebar-primary: 280 90% 65%;
+    --sidebar-accent: 262 40% 26%;
+    --sidebar-ring: 280 90% 65%;
+  }
+  .theme-violet.dark {
+    --primary: 280 85% 65%;
+    --primary-foreground: 262 60% 10%;
+    --accent: 280 90% 65%;
+    --ring: 280 90% 65%;
+  }
+
+  /* ===== Theme: Rose ===== */
+  .theme-rose {
+    --primary: 346 70% 38%;
+    --primary-foreground: 350 100% 97%;
+    --accent: 340 85% 58%;
+    --accent-foreground: 346 70% 12%;
+    --ring: 346 70% 38%;
+    --sidebar-background: 346 50% 18%;
+    --sidebar-primary: 340 85% 60%;
+    --sidebar-accent: 346 40% 26%;
+    --sidebar-ring: 340 85% 60%;
+  }
+  .theme-rose.dark {
+    --primary: 340 85% 62%;
+    --primary-foreground: 346 70% 10%;
+    --accent: 340 85% 62%;
+    --ring: 340 85% 62%;
+  }
+
+  /* ===== Theme: Slate (graphite) ===== */
+  .theme-slate {
+    --primary: 215 25% 22%;
+    --primary-foreground: 210 20% 96%;
+    --accent: 200 90% 50%;
+    --accent-foreground: 215 30% 12%;
+    --ring: 215 25% 22%;
+    --sidebar-background: 215 30% 12%;
+    --sidebar-primary: 200 90% 55%;
+    --sidebar-accent: 215 25% 22%;
+    --sidebar-ring: 200 90% 55%;
+  }
+  .theme-slate.dark {
+    --primary: 200 90% 55%;
+    --primary-foreground: 215 30% 10%;
+    --accent: 200 90% 55%;
+    --ring: 200 90% 55%;
+  }
 }
 
 @layer base {

@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [accessCode, setAccessCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const ACCESS_CODE = "Rn15002442";
+  const ACCESS_CODE = localStorage.getItem("access-code") || "Rn15002442";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
