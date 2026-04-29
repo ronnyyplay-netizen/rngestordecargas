@@ -70,8 +70,14 @@ export default function DriverPage() {
   const totalRev = revenues.reduce((s, r) => s + r.amount, 0);
   const profit = totalRev - totalExp;
 
-  const filteredExpenses = filterCategory === "Todas" ? expenses : expenses.filter(e => e.category === filterCategory);
-  const filteredRevenues = revenues;
+  const MONTHS = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  const matchesMonth = (dateStr: string) => {
+    if (filterMonth === "Todos") return true;
+    const m = new Date(dateStr).getMonth();
+    return MONTHS[m] === filterMonth;
+  };
+  const filteredExpenses = expenses.filter(e => (filterCategory === "Todas" || e.category === filterCategory) && matchesMonth(e.date));
+  const filteredRevenues = revenues.filter(r => matchesMonth(r.date));
 
   function sanitizeFileName(name: string) {
     return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9._-]/g, "_");
