@@ -162,7 +162,7 @@ export default function DriverPage() {
     { label: "Lucro", value: profit, icon: TrendingUp, color: profit >= 0 ? "text-success" : "text-destructive" },
   ];
 
-  const exportExpenses = filteredExpenses;
+  
 
   return (
     <div className="space-y-6">
