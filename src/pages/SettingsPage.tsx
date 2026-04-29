@@ -59,6 +59,10 @@ export default function SettingsPage() {
   const [logo, setLogo] = useState(settings.logoUrl);
   const importRef = useRef<HTMLInputElement>(null);
   const [synced, setSynced] = useState(false);
+  const [colorTheme, setColorTheme] = useState<ColorTheme>(getStoredColorTheme());
+  const [currentCode, setCurrentCode] = useState("");
+  const [newCode, setNewCode] = useState("");
+  const [confirmCode, setConfirmCode] = useState("");
 
   // Sync local state when settings load from DB
   if (!synced) {
@@ -67,6 +71,22 @@ export default function SettingsPage() {
       setLogo(settings.logoUrl);
     }
     setSynced(true);
+  }
+
+  function handleChangeTheme(theme: ColorTheme) {
+    setColorTheme(theme);
+    applyColorTheme(theme);
+    toast.success("Tema atualizado!");
+  }
+
+  function handleChangeAccessCode() {
+    const stored = localStorage.getItem("access-code") || "Rn15002442";
+    if (currentCode !== stored) { toast.error("Código atual incorreto."); return; }
+    if (newCode.trim().length < 6) { toast.error("O novo código deve ter ao menos 6 caracteres."); return; }
+    if (newCode !== confirmCode) { toast.error("Os códigos não coincidem."); return; }
+    localStorage.setItem("access-code", newCode.trim());
+    setCurrentCode(""); setNewCode(""); setConfirmCode("");
+    toast.success("Código de acesso atualizado!");
   }
 
   function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
