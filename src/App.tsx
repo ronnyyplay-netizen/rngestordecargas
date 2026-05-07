@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import DriverPage from "@/pages/DriverPage";
+import DriversListPage from "@/pages/DriversListPage";
 
 import ContactPage from "@/pages/ContactPage";
 import SettingsPage from "@/pages/SettingsPage";
@@ -35,6 +36,7 @@ function AppRoutes() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/motoristas" element={<DriversListPage />} />
         <Route path="/motorista/:id" element={<DriverPage />} />
         
         <Route path="/contato" element={<ContactPage />} />
