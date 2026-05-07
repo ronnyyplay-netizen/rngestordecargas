@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout";
 import Dashboard from "@/pages/Dashboard";
 import DriverPage from "@/pages/DriverPage";
+import DriversListPage from "@/pages/DriversListPage";
 
 import ContactPage from "@/pages/ContactPage";
 import SettingsPage from "@/pages/SettingsPage";
